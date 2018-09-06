@@ -1,9 +1,10 @@
 $(document).ready(function() {
 
 
-    // each character is their own object with different stats
-
-
+    /* Each character is their own object with different stats
+    * Each has an init method which initializes their stats randomly
+    * Each has an update attack method that increases their attack power
+    */
     var han = {
         name : "Who, Me?",
         attack : 0,
@@ -12,9 +13,9 @@ $(document).ready(function() {
 
         init : function() {
 
-            this.attack = Math.floor(Math.random() * 30);
-            this.counterAttack = Math.floor(Math.random() * 30);
-            this.hp = Math.floor(Math.random() * 150);
+            this.attack = Math.floor(Math.random() * 20 + 5);
+            this.counterAttack = Math.floor(Math.random() * 20 + 5);
+            this.hp = Math.floor(Math.random() * 150 + 25);
 
 
 
@@ -36,16 +37,12 @@ $(document).ready(function() {
 
         init : function() {
 
-            this.attack = Math.floor(Math.random() * 20);
-            this.counterAttack = Math.floor(Math.random() * 10);
-            this.hp = Math.floor(Math.random() * 200);
-
-
-
+            this.attack = Math.floor(Math.random() * 20 + 5);
+            this.counterAttack = Math.floor(Math.random() * 20 + 5);
+            this.hp = Math.floor(Math.random() * 200 + 30 );
         },
 
         updateAttack : function() {
-
             this.attack += 5
         },
 
@@ -59,9 +56,9 @@ $(document).ready(function() {
 
         init : function() {
 
-            this.attack = Math.floor(Math.random() * 10);
-            this.counterAttack = Math.floor(Math.random() * 20);
-            this.hp = Math.floor(Math.random() * 100);
+            this.attack = Math.floor(Math.random() * 10 + 5);
+            this.counterAttack = Math.floor(Math.random() * 20 + 10);
+            this.hp = Math.floor(Math.random() * 100 + 20);
 
 
 
@@ -74,24 +71,6 @@ $(document).ready(function() {
 
     };
 
-    var jarjar = {
-
-        attack : 0,
-        counterAttack: 0,
-        hp: 0,
-
-        init : function() {
-
-            this.attack = Math.floor(Math.random() * 25);
-            this.counterAttack = Math.floor(Math.random() * 15);
-            this.hp = Math.floor(Math.random() * 300);
-
-
-
-        },
-
-
-    };
 
     var highGround = {
         name: "High Ground Obi",
@@ -101,37 +80,31 @@ $(document).ready(function() {
 
         init : function() {
 
-            this.attack = Math.floor(Math.random() * 50);
-            this.counterAttack = Math.floor(Math.random() * 5);
-            this.hp = Math.floor(Math.random() * 200);
-
-
-
+            this.attack = Math.floor(Math.random() * 50 + 5);
+            this.counterAttack = Math.floor(Math.random() * 5 + 20);
+            this.hp = Math.floor(Math.random() * 200 + 50);
         },
 
         updateAttack : function() {
-
             this.attack += 8
         },
 
 
     };
 
-
-
-
-    // game code
-    // first I need have the player pick a character and then initialize his character
-    // Sith jar jar is the secret boss 
-    
-
+    // This is the game object code that holds the player's character, the enemy's chracter
+    // if the player won the previous battle, and how many enemys are defeated.
+    // It also handles game initialization, attacks, and end of game scenarios.
     var game = {
 
         playerCharacter: null,
         enemyCharacter: null,
         playerWon: false,
+        enemysDefeated: 0,
 
 
+        // This sets game's playerCharacter to whichever the user clicked and moves the
+        // character's picture under 'Your Character'
         chooseCharacter : function(player) {
 
             if($(player).attr("id") === "obiwan") {
@@ -143,21 +116,17 @@ $(document).ready(function() {
              } else {
                  this.playerCharacter = highGround;
              }
-            // console.log(this);
             
-             
-             
              $("#yourChar").append($(player));
 
              $(player).attr("chosen", "true");
             
-           
         },
 
+        // This sets game's enemyCharacter to whichever the user clicked and moves the
+        // character's picture under  
         chooseEnemy : function(enemy) {
-            
-            
-        
+         
             if($(enemy).attr("id") === "obiwan") {
                 this.enemyCharacter = obiwan; 
             } else if($(enemy).attr("id") === "han") {
@@ -173,22 +142,21 @@ $(document).ready(function() {
              $(enemy).css("border-width", "5px");
              $(enemy).css("border-color", "green");
 
-            // console.log(this);
-
-
-
+            // Deletes previous battle text. 
+            if (this.playerWon) {
+                $("#battleText").html("");
+            }
         },
 
+        // This initializes the characters and manipulates the DOM to setup the fight
         initializeFight : function(player, enemy) {
-           // console.log(this.playerCharacter);
             if(!this.playerWon) {
                 console.log("initializes player's char");
                 this.playerCharacter.init();
             }
             this.enemyCharacter.init();
-            //console.log(this.enemyCharacter);
 
-            
+            // Displays initialized health
             $(player).children("#health").text(this.playerCharacter.hp);
             $(enemy).children("#health").text(this.enemyCharacter.hp); 
             
@@ -196,69 +164,81 @@ $(document).ready(function() {
             $("#yourChar").css("left", "500px");
             $("#defender").css("position", "absolute");
             $("#defender").css("left", "825px");
-            $("#defender").css("bottom", "368px");
+            $("#defender").css("bottom", "353px");
             $(enemy).css("position", "relative");
             $(enemy).css("right", "40px");
 
-
-
         },
+
+        // This handles each attack, calculating updated hp, updates player's attack,
+        // and handles end of game conditions
 
         attack : function(player, enemy) {
 
-            this.playerCharacter.hp -= this.enemyCharacter.counterAttack;
-            console.log(this.playerCharacter.hp);
-            console.log(this.playerCharacter.attack);
-            if(this.playerCharacter.hp <= 0) {
-                this.playerCharacter.hp = 0;
-            }
-            this.enemyCharacter.hp -= this.playerCharacter.attack;
-           // console.log(this.enemyCharacter.hp)
-            if(this.enemyCharacter.hp <= 0) {
-                this.enemyCharacter.hp = 0;
-            }
-            $(player).children("#health").text(this.playerCharacter.hp);
-            $(enemy).children("#health").text(this.enemyCharacter.hp);
-
-            this.playerCharacter.updateAttack();
-        
-
             
-            $("#battleText").html("<p>You attacked " + this.enemyCharacter.name + " for " + this.playerCharacter.attack + " damage.<p>" + "<p>" + this.enemyCharacter.name + " attacked you back for " + this.enemyCharacter.counterAttack + " damage. </p>");
+            if (this.enemyCharacter.hp > 0) {
 
-            if(this.enemyCharacter.hp === 0) {
-                alert("You defeated " + this.enemyCharacter.name + "! Choose a new opponent!");
-                this.playerWon = true;
-                //$(enemy).remove();
-            }
-            if(this.playerCharacter.hp === 0) {
-                var playAgain = confirm("You were slain by " + this.enemyCharacter.name + "! Refresh the page to try again");
-                if (playAgain) {
-                    location.reload();
+                this.playerCharacter.hp -= this.enemyCharacter.counterAttack;
+                console.log("players hp is " + this.playerCharacter.hp);
+                console.log("players attack is " + this.playerCharacter.attack);
+                console.log("players counterattack is " + this.playerCharacter.counterAttack);
+
+                if(this.playerCharacter.hp <= 0) {
+                    this.playerCharacter.hp = 0;
                 }
-            }
+                this.enemyCharacter.hp -= this.playerCharacter.attack;
+            // console.log(this.enemyCharacter.hp)
+                if(this.enemyCharacter.hp <= 0) {
+                    this.enemyCharacter.hp = 0;
+                }
+                $(player).children("#health").text(this.playerCharacter.hp);
+                $(enemy).children("#health").text(this.enemyCharacter.hp);
 
-
+                this.playerCharacter.updateAttack();
             
+                $("#battleText").html("<p>You attacked " + this.enemyCharacter.name + " for " + this.playerCharacter.attack + " damage.<p>" + "<p>" + this.enemyCharacter.name + " attacked you back for " + this.enemyCharacter.counterAttack + " damage. </p>");
 
-            
+                if(this.enemyCharacter.hp === 0) {
+                    this.playerWon = true;
 
+                    var winText = "<p>You defeated " + this.enemyCharacter.name + ". Please click a new opponenent. <p>";
+                    $("#battleText").append(winText);
+                    this.enemysDefeated++;
+                    if (this.enemysDefeated === 3) {
+                        var victory = $("<h1 class = 'fade-in'</h1>");
+                        $(victory).html("CONGRATULATIONS! YOU ARE THE CHAMPION OF THE ANNUAL CORUSCANT BATTLE ROYALE")
+                        $(victory).css("color", "red");
+                        $(victory).css("position", "relative");
+                        $(victory).css("bottom", "400px");
+                        $(victory).css("right", "0px");
+                        $(victory).css("display", "block");
+                        $(victory).css("margin","0");
+                        $(victory).css("text-align","center");
+                        $(victory).appendTo( document.body );
+                    }
+                }
 
-        
-
-
+                 
+                if(this.playerCharacter.hp === 0) {
+                    var playAgain = confirm("You were slain by " + this.enemyCharacter.name + "! Refresh the page to try again");
+                    if (playAgain) {
+                        location.reload();
+                    }
+                }
+            }      
         }
     }
 
    
-  
     var playerChosen = false;
     var player = null;
     var enemy = null;
     
+
+    // First on click event for choosing a player
     $(".character").on("click", function() {
         if(playerChosen === false) {
-            player = this;
+            player = this; // sets player to the id so we can pass it in game's methods to manipulate
             //console.log($(this).attr("id"));
             game.chooseCharacter(player);
             
@@ -285,51 +265,27 @@ $(document).ready(function() {
             $("#han").css("border-width", "0px");
         } 
         
-            
-            $(".character").on("click", function() {
-                if(game.playerWon) {
+        // Second on click to choose an enemy. This also calls on game to 
+        // initialize the fight.
+        $(".character").on("click", function() {
+            if(game.playerWon) {
+                $(enemy).remove();
+            }
+            playerWon = false;
+            if(playerChosen) {
+                enemy = this;
+                game.chooseEnemy(enemy);
+                game.initializeFight(player, enemy);
+                enemyChosen = true;
+            }
 
-                
-                    $(enemy).remove();
-                }
-                playerWon = false;
-                if(playerChosen) {
-                    //console.log(this);
-                    $(this).off("click",this);
-                // fix this later
-                    enemy = this;
-                    game.chooseEnemy(enemy);
-                    //console.log(player);
-                    game.initializeFight(player, enemy);
-                    enemyChosen = true;
+        });
 
-                    $("#attack").on("click", function() {
-
-                        game.attack(player, enemy);
-
-
-
-
-                    });
-
-        
-
-
-                }
-
-            });
-            
-            
-
-         
-            
-
-
-
-
-
-        
-
+        // Clicking the attack button calls on game's attack method
+        $("#attack").unbind().on("click", function() {
+            console.log("attack was clicked");
+            game.attack(player, enemy);
+        });
         
     });
 
@@ -346,18 +302,6 @@ $(document).ready(function() {
 
 
     
-
-   /* $(".character").on("click", function() {
-        if(gameStarted === true) {
-            var character = this;
-            console.log($(this).attr("id"));
-            game.chooseEnemy(character);
-        }   
-
-
-
-    });
-    */
 
 
 
